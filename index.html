@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IPgle</title>
+
+  <link rel="icon" type="image/x-icon" href="IPicon.ico">
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    html, body, * {
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #1f1f1f;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e8eaed;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .logo {
+      width: 340px;
+      margin-bottom: 36px;
+    }
+
+    .search-bar {
+      width: 680px;
+      height: 56px;
+      background: #4d5156;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      padding-left: 22px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      margin-bottom: 18px;
+    }
+
+    .search-text {
+      position: absolute;
+      left: 22px;
+      font-size: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(22px);
+      transition: all 0.6s ease;
+      color: #e8eaed;
+      cursor: pointer;
+    }
+
+    .search-text.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .search-text.exit {
+      opacity: 0;
+      transform: translateY(-22px);
+    }
+
+    /* IP display */
+    .ip-box {
+      font-size: 16px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .ip-value {
+      filter: blur(6px);
+      margin-right: 8px;
+      transition: filter 0.3s ease;
+    }
+
+    .ip-value.visible {
+      filter: blur(0);
+    }
+
+    .toggle {
+      color: #8ab4f8;
+      cursor: pointer;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="logo.png" alt="IPgle Logo" class="logo">
+
+    <div class="search-bar">
+      <div class="search-text active" data-action="ip">What's my IP?</div>
+      <div class="search-text" data-action="vpn">Download VPN</div>
+      <div class="search-text" data-action="what">What's a IP?</div>
+    </div>
+
+    <div class="ip-box" id="ipBox">
+      <span class="ip-value" id="ipValue">Loading...</span>
+      <span class="toggle" id="toggleBtn">Show?</span>
+    </div>
+  </div>
+
+  <script>
+    const texts = document.querySelectorAll('.search-text');
+    let index = 0;
+
+    // rotating animation
+    setInterval(() => {
+      const current = texts[index];
+      current.classList.remove('active');
+      current.classList.add('exit');
+
+      index = (index + 1) % texts.length;
+      const next = texts[index];
+
+      setTimeout(() => {
+        current.classList.remove('exit');
+        next.classList.add('active');
+      }, 600);
+    }, 5000);
+
+    const ipBox = document.getElementById('ipBox');
+    const ipValue = document.getElementById('ipValue');
+    const toggleBtn = document.getElementById('toggleBtn');
+    let ipVisible = false;
+    let ipFetched = false;
+
+    texts.forEach(el => {
+      el.addEventListener('click', () => {
+        const action = el.dataset.action;
+
+        if (action === 'what') {
+          window.open(
+            "https://www.google.com/search?q=What%27s+an+IP%3F&sxsrf=ANbL-n6Cp4vSy1lzGlRUdqfF2cnazT39Mg%3A1769966921035",
+            "_blank"
+          );
+        }
+
+        if (action === 'vpn') {
+          window.open("https://protonvpn.com/", "_blank");
+        }
+
+        if (action === 'ip') {
+          ipBox.style.display = 'block';
+
+          if (!ipFetched) {
+            fetch("https://api.ipify.org?format=json")
+              .then(res => res.json())
+              .then(data => {
+                ipValue.textContent = data.ip;
+                ipFetched = true;
+              })
+              .catch(() => {
+                ipValue.textContent = "?";
+              });
+          }
+        }
+      });
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      ipVisible = !ipVisible;
+      ipValue.classList.toggle('visible', ipVisible);
+      toggleBtn.textContent = ipVisible ? "Unshow?" : "Show?";
+    });
+  </script>
+</body>
+</html>
